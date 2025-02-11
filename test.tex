@@ -1,0 +1,49 @@
+\documentclass{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{algorithm, algpseudocode}
+\usepackage{hyperref}
+\usepackage{listings}
+
+\title{CS 440: Fast Trajectory Replanning}
+\author{Your Name \\ Your RUID \\ Team Members (if any)}
+\date{Spring 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This project involves implementing and analyzing pathfinding algorithms using A* search in a gridworld environment. The agent navigates through an unknown terrain to reach a specified target while dynamically updating its path based on obstacles.
+
+\section{Problem Description}
+The agent moves in a gridworld where cells can be either blocked or unblocked. It starts with limited knowledge and updates its map as it traverses the grid. The objective is to reach the goal efficiently using search algorithms.
+
+\section{Algorithm Implementation}
+The following algorithms are implemented:
+\begin{itemize}
+    \item Repeated Forward A*
+    \item Repeated Backward A*
+    \item Adaptive A*
+\end{itemize}
+A binary heap is used to implement the priority queue for efficient search operations.
+
+\section{Experimental Setup}
+The environment consists of 50 randomly generated gridworlds of size $101 \times 101$. The Manhattan distance heuristic is used for guiding the search process.
+
+\section{Results and Analysis}
+We compare different implementations based on the number of expanded nodes and runtime. The experiments evaluate:
+\begin{itemize}
+    \item Effects of different tie-breaking strategies in A*
+    \item Comparison between Repeated Forward A* and Repeated Backward A*
+    \item Performance of Adaptive A* over Repeated A*
+\end{itemize}
+
+\section{Conclusion}
+This project explores the efficiency of real-time pathfinding techniques in dynamic environments. The findings help in understanding how different heuristics and tie-breaking strategies impact search performance.
+
+\section{References}
+[1] A. Koenig and M. Likhachev, "Adaptive A*," International Joint Conference on Autonomous Agents and Multiagent Systems, 2005.
+
+\end{document}
