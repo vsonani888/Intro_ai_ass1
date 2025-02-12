@@ -95,5 +95,5 @@ if __name__ == "__main__":
         rows=101,
         cols=101,
         block_prob=0.30,
-        output_file="all_mazes.txt"
+        output_file="all_mazes_101.txt"
     )
