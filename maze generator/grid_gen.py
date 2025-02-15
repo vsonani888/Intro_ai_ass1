@@ -91,9 +91,9 @@ def generate_and_save_mazes_txt(
 if __name__ == "__main__":
     # Generate 50 mazes and store them all into 'all_mazes.txt'
     generate_and_save_mazes_txt(
-        num_mazes=50,
-        rows=101,
-        cols=101,
+        num_mazes=5,
+        rows=5,
+        cols=5,
         block_prob=0.30,
         output_file="all_mazes_101.txt"
     )
