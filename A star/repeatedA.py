@@ -88,6 +88,68 @@ def repeatedForwardAStarB(grid, start, goal, visualize=False):
 
     return None, total_expanded  # No path found
 
+def reconstruct_path(came_from, start, goal):
+    """Reconstructs the path from start to goal using backtracking."""
+    path = []
+    current = start
+    while current != goal:
+        path.append(current)
+        current = came_from[current]
+    path.append(goal)
+    path.reverse()
+    return path
+
+def a_star_backward(grid, start, goal):
+    """Performs Backward A* search to find the shortest path from goal to start."""
+    grid_size = len(grid)
+    open_list = PriorityQueue()
+    came_from = {}  # For path reconstruction
+    g_values = {goal: 0}  # g(s) values for backward search
+    f_goal = manhattan_distance(goal, start)  # Initial f-value
+    
+    open_list.push(f_goal, goal)
+
+    while not open_list.is_empty():
+        current = open_list.pop()
+
+        if current == start:  # Start reached (Backward A*)
+            return reconstruct_path(came_from, goal, start)
+
+        for neighbor in get_neighbors(current, grid_size):
+            if grid[neighbor] == 2:  # Skip blocked cells
+                continue
+
+            tentative_g = g_values[current] + 1  # Move cost = 1
+            if neighbor not in g_values or tentative_g < g_values[neighbor]:
+                g_values[neighbor] = tentative_g
+                f_value = tentative_g + manhattan_distance(neighbor, start)
+                open_list.push(f_value, neighbor)
+                came_from[neighbor] = current
+
+    return None  # No path found
+
+def repeated_backward_a_star(grid, start, goal):
+    """
+    Implements Repeated Backward A* where the agent updates its knowledge as it moves.
+    """
+    current_position = goal  # Start search from goal
+
+    while current_position != start:
+        path = a_star_backward(grid, start, current_position)
+
+        if path is None:
+            print("No path found.")
+            return None
+
+        for step in reversed(path):  # Move backward towards the agent
+            if grid[step] == 2:  # Obstacle found, recompute A*
+                break
+            current_position = step  # Move agent forward
+        
+        print(f"Agent moved to: {current_position}")
+
+    print("Start reached!")
+    return path
 # Example Usage
 if __name__ == "__main__":
     grid_size = 10
@@ -108,3 +170,4 @@ if __name__ == "__main__":
         print("Nodes Expanded:", expanded_nodes)
     else:
         print("No Path Found")
+
