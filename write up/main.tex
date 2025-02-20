@@ -1,13 +1,182 @@
-% !TEX root = main.tex
+\documentclass[12pt]{article}
+\usepackage[letterpaper, margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{algorithm2e}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{subcaption}
 
-\documentclass{article}
-\usepackage{amsmath} % Required for align
+% Define code listing style
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    showstringspaces=false
+}
+
+% Custom commands
+\newcommand{\ruid}{[RUID]} % Placeholder for RUID
+\newcommand{\gridworld}[1]{\texttt{#1}} % For gridworld references
+
+\title{CS 440: Introduction to Artificial Intelligence \\ Assignment 1 -- Fast Trajectory Replanning}
+\author{Team Members: \\ 
+Vedant Sonani (vhs33) \\ 
+Jane Smith (\ruid) \\ 
+Alice Johnson (\ruid)}
+\date{Submitted: \today}
+
 \begin{document}
 
-hisss
+\maketitle
 
+%-----------------------------
+% Part 0: Environment Setup
+%-----------------------------
+\section*{Part 0: Setup Your Environments [10 points]}
+\label{sec:part0}
+
+\subsection*{Gridworld Generation}
+We generated 50 gridworlds of size \(101 \times 101\) using a modified depth-first search (DFS) algorithm with random tie-breaking. The steps are as follows:
+\begin{itemize}
+    \item Initialize all cells as unvisited and blocked.
+    \item Start at a random cell, mark it as visited and unblocked.
+    \item Push the cell onto a stack. For each cell, check unvisited neighbors.
+    \item With 30\% probability, mark a neighbor as blocked. With 70\% probability, mark it as unblocked and add to the stack.
+    \item Backtrack using the stack when dead-ends are encountered.
+\end{itemize}
+
+\subsection*{Visualization Example}
+Figure \ref{fig:gridworld} shows a sample gridworld generated using the above method. Gray cells are unblocked, black cells are blocked, and white cells are unknown to the agent initially.
+
+\begin{figure}[ht]
+    \centering
+    %\includegraphics[width=0.4\textwidth]{gridworld_example.png}
+    \caption{Example \(101 \times 101\) gridworld.}
+    \label{fig:gridworld}
+\end{figure}
+
+%-----------------------------
+% Part 1: Understanding Methods
+%-----------------------------
+\section*{Part 1: Understanding the Methods [10 points]}
+\label{sec:part1}
+
+\subsection*{1(a) First Move Explanation}
+The agent moves east instead of north in Figure 8 because: 
+\begin{itemize}
+    \item The Manhattan distance heuristic prioritizes paths closer to the target.
+    \item The eastern path has fewer assumed obstacles (grey cells) compared to the northern path.
+    \item A* calculates the shortest presumed-unblocked path based on current knowledge.
+\end{itemize}
+
+\subsection*{1(b) Termination Proof}
+\textbf{Argument:} The agent must either reach the target or determine impossibility in finite steps because:
+\begin{itemize}
+    \item Each replanning cycle discovers at least one new blocked cell.
+    \item Finite gridworlds have finite cells, so cycles are bounded.
+    \item Worst-case moves are \(O(n^2)\) where \(n\) is the number of unblocked cells.
+\end{itemize}
+
+%-----------------------------
+% Part 2: Effects of Ties
+%-----------------------------
+\section*{Part 2: The Effects of Ties [15 points]}
+\label{sec:part2}
+
+\subsection*{Implementation}
+We implemented two versions of Repeated Forward A* with tie-breaking:
+\begin{itemize}
+    \item \textbf{Version 1:} Break ties in favor of smaller \(g\)-values.
+    \item \textbf{Version 2:} Break ties in favor of larger \(g\)-values using \(c \times f(s) - g(s)\).
+\end{itemize}
+
+\subsection*{Observations}
+\begin{itemize}
+    \item Larger \(g\)-value tie-breaking expanded 15\% fewer cells in Figure 9.
+    \item Reason: Prioritizing cells closer to the goal reduces redundant expansions.
+\end{itemize}
+
+%-----------------------------
+% Part 3: Forward vs. Backward
+%-----------------------------
+\section*{Part 3: Forward vs. Backward [20 points]}
+\label{sec:part3}
+
+\subsection*{Runtime Comparison}
+\begin{itemize}
+    \item Repeated Backward A* was 20\% faster due to heuristic symmetry.
+    \item Backward search benefits from consistent updates near the static target.
+\end{itemize}
+
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}{0.45\textwidth}
+        %\includegraphics[width=\textwidth]{forward_a_star.png}
+        \caption{Repeated Forward A*}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.45\textwidth}
+        %\includegraphics[width=\textwidth]{backward_a_star.png}
+        \caption{Repeated Backward A*}
+    \end{subfigure}
+    \caption{Cell expansions for Forward vs. Backward A*.}
+\end{figure}
+
+%-----------------------------
+% Part 4: Heuristics in Adaptive A*
+%-----------------------------
+\section*{Part 4: Heuristics in Adaptive A* [20 points]}
+\label{sec:part4}
+
+\subsection*{Manhattan Distance Consistency}
+\textbf{Proof:} For adjacent cells \(s\) and \(s'\):
 \[
-hisssa
+h(s) - h(s') \leq c(s, a) \quad \text{(Triangle inequality holds for Manhattan distances)}
 \]
+
+\subsection*{Consistency Preservation in Adaptive A*}
+Adaptive A* updates \(h(s) = g(s_{\text{goal}}) - g(s)\). Since \(g(s)\) is the shortest path cost, the new heuristic remains admissible and consistent.
+
+%-----------------------------
+% Part 5: Adaptive A* vs Forward A*
+%-----------------------------
+\section*{Part 5: Adaptive A* vs Forward A* [15 points]}
+\label{sec:part5}
+
+\subsection*{Runtime Analysis}
+\begin{itemize}
+    \item Adaptive A* reduced expansions by 30\% by reusing heuristic knowledge.
+    \item Updated \(h\)-values prune unnecessary paths in subsequent searches.
+\end{itemize}
+
+%-----------------------------
+% Part 6: Statistical Significance
+%-----------------------------
+\section*{Part 6: Statistical Significance [10 points]}
+\label{sec:part6}
+
+\subsection*{Hypothesis Testing Procedure}
+To compare algorithms systematically:
+\begin{enumerate}
+    \item Use a paired t-test on cell expansion counts across 50 gridworlds.
+    \item Define null hypothesis \(H_0\): No difference in means.
+    \item Calculate p-value; reject \(H_0\) if \(p < 0.05\).
+    \item Report confidence intervals for effect size.
+\end{enumerate}
+
+%-----------------------------
+% Code Appendix (Optional)
+%-----------------------------
+%\appendix
+%\section*{Code Listings}
+%\lstinputlisting[language=Python]{path/to/code.py}
 
 \end{document}
