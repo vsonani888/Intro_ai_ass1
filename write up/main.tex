@@ -44,21 +44,14 @@ Alice Johnson (\ruid)}
 \label{sec:part0}
 
 \subsection*{Gridworld Generation}
-We generated 50 gridworlds of size \(101 \times 101\) using a modified depth-first search (DFS) algorithm with random tie-breaking. The steps are as follows:
-\begin{itemize}
-    \item Initialize all cells as unvisited and blocked.
-    \item Start at a random cell, mark it as visited and unblocked.
-    \item Push the cell onto a stack. For each cell, check unvisited neighbors.
-    \item With 30\% probability, mark a neighbor as blocked. With 70\% probability, mark it as unblocked and add to the stack.
-    \item Backtrack using the stack when dead-ends are encountered.
-\end{itemize}
+To generate the grid we first generate a list with $?$ for all blocks marking them as unassigned, we also have a visited list that is initialized with false meaning that none are visited by the DFS. In the while loop, a visited list is made to determine if there are unvisited blocks, if so we randomly select a block in the grid and start the dfs, marking them as blocked and unblocked with .3 probability randomly. If all neighbors are visited we start again with the while loop finding unvisited blocks and doing DFS on them again until all blocks are marked as unblocked or blocked. Once the grid is done, we select a random unblocked cell and mark it as agent or target. The grid is then exported to text document for the other search algorithms to use.
 
 \subsection*{Visualization Example}
-Figure \ref{fig:gridworld} shows a sample gridworld generated using the above method. Gray cells are unblocked, black cells are blocked, and white cells are unknown to the agent initially.
+Figure \ref{fig:gridworld} shows a sample gridworld generated using the above method. White cells are unblocked, black cells are blocked, red block is the agent and the blue block is the target.
 
 \begin{figure}[ht]
     \centering
-    %\includegraphics[width=0.4\textwidth]{gridworld_example.png}
+    \includegraphics[width=0.75\textwidth]{Figure_1.png}
     \caption{Example \(101 \times 101\) gridworld.}
     \label{fig:gridworld}
 \end{figure}

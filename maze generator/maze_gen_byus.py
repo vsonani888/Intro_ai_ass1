@@ -1,7 +1,7 @@
 import random
 
 def generate_maze(size):
-    print(size)
+    #print(size)
 
     grid = [['?' for _ in range(size)] for _ in range(size)] # initialize a list with ? to mark it as unvisited
     visited = [[False for _ in range(size)] for _ in range(size)] # make a list for cells that are unvisited
@@ -110,12 +110,24 @@ def all_visited (visited): # #loops over the visited list and finds and returns 
 def print_maze(grid): #loops over the grid list and prints it out
     for row in range(len(grid)):
         for column in range(len(grid)):
-            print(grid[row][column], end="")
-        print()
+            print(grid[row][column], end="", file = file)
+        print(file = file)
 
 if __name__ == "__main__":
     
     print("hi from main")
 
-    size = 15
-    generate_maze(size)
+    size = 5
+    maze_qty = 50
+    file = open("output.txt", "w")
+
+    print("printing ", maze_qty, " mazes", file = file)
+
+    #generate_maze(size)
+
+    for i in range(maze_qty):
+        print("Maze ", i, file = file)
+        generate_maze(size)
+        print("", file = file)
+
+    file.close
