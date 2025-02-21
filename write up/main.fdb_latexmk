@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1740025427.98946 "d:/GitHub/Intro_ai_ass1/write up/main.tex" "main.pdf" "main" 1740025429.48202 0
+["pdflatex"] 1740108702.75478 "d:/GitHub/Intro_ai_ass1/write up/main.tex" "main.pdf" "main" 1740108704.1809 0
   "C:/Users/vedan/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1740024893 80909 eab91d9745dd2edfd62a31d53cd5fe15 ""
   "C:/Users/vedan/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm1200.pk" 1740024895 14064 99b98a3876cc3bf036530df1205c91f7 ""
   "C:/Users/vedan/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1739500711 12017836 f77cfb844fe4b58527261e87d16c7125 ""
@@ -99,10 +99,10 @@
   "C:/Users/vedan/AppData/Local/Programs/MiKTeX/tex/latex/tools/xspace.sty" 1730400552 4545 e3f4de576c914e2000f07f69a891c071 ""
   "C:/Users/vedan/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "C:/Users/vedan/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
-  "d:/GitHub/Intro_ai_ass1/write up/main.tex" 1740025427 6558 802a07876b5b5d20f42fdb47ac9192be ""
-  "main.aux" 1740025429 1287 198aa654bfd825b5597c4c45004fa297 "pdflatex"
-  "main.out" 1740025429 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "main.tex" 1740025427 6558 802a07876b5b5d20f42fdb47ac9192be ""
+  "d:/GitHub/Intro_ai_ass1/write up/main.tex" 1740108701 7146 af9a57674e32fd82c1f3742f68b903fb ""
+  "main.aux" 1740108703 1287 198aa654bfd825b5597c4c45004fa297 "pdflatex"
+  "main.out" 1740108703 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "main.tex" 1740108701 7146 af9a57674e32fd82c1f3742f68b903fb ""
   (generated)
   "main.aux"
   "main.log"

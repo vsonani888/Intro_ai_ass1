@@ -70,20 +70,11 @@ Figure \ref{fig:gridworld} shows a sample gridworld generated using the above me
 \label{sec:part1}
 
 \subsection*{1(a) First Move Explanation}
-The agent moves east instead of north in Figure 8 because: 
-\begin{itemize}
-    \item The Manhattan distance heuristic prioritizes paths closer to the target.
-    \item The eastern path has fewer assumed obstacles (grey cells) compared to the northern path.
-    \item A* calculates the shortest presumed-unblocked path based on current knowledge.
-\end{itemize}
+The agent moves east instead of north in Figure 8 because the agent assumes that all unknown cells are unblocked, and then looks for the shortest path based on this assumption. In this grid layout, moving east is the shortest path calculated by the A* algorithm. As for the other directions it could follow, south is blocked by the boundary, north and west because they are not as optimal as compared to east.
 
 \subsection*{1(b) Termination Proof}
-\textbf{Argument:} The agent must either reach the target or determine impossibility in finite steps because:
-\begin{itemize}
-    \item Each replanning cycle discovers at least one new blocked cell.
-    \item Finite gridworlds have finite cells, so cycles are bounded.
-    \item Worst-case moves are \(O(n^2)\) where \(n\) is the number of unblocked cells.
-\end{itemize}
+The agent must either reach the target or determine impossibility in finite steps because of the fact that the grid is finite. Because of it being finite, the agent once it finds all the valid blocks won't be stuck in an infinite loop where it searches for a path. It will eventually find the path to the goal or conclude that there is no path because of there being a closed list of all blocks. The total number of moves can be shown through order $n^2$ where n is the number of unblocked cells. Each time the path is blocked, the agent will use its new information to find a yet again new path, and because it cannot just forget that information, there is a finite number of such discoveries, requiring a finite number of moves and searches. Ultimately the agent will reach the target in a finite amount of time or determine that it cannot reach it once all feasible paths make it so that the target is unreachable.
+
 
 %-----------------------------
 % Part 2: Effects of Ties
