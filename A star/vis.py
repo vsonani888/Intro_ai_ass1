@@ -1,57 +1,56 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from repeatedA import repeatedForwardAStarB
-def visualize_grid(grid, path, start, goal):
+import numpy as np
+
+def visualize_maze(grid, path=None, title="Maze Visualization"):
     """
-    Visualizes the grid with the path from start to goal.
-
-    Arguments:
-    grid -- 2D numpy array representing the grid (1=unblocked, 2=blocked)
-    path -- List of tuples representing the path taken
-    start -- Tuple (row, col) representing the starting position
-    goal -- Tuple (row, col) representing the goal position
+    Visualizes the maze using matplotlib.
+    
+    Args:
+        grid (list[list[str]]): 2D maze grid with '_', '#', 'A', 'T'.
+        path (list[tuple]): List of (row, col) tuples representing the found path.
+        title (str): Title of the plot.
     """
-
-    plt.figure(figsize=(6, 6))
-    cmap = plt.get_cmap("gray_r")  # Use grayscale for the grid
-
-    # Display the grid
-    plt.imshow(grid, cmap=cmap, origin="upper")
-
-    # Mark the path in blue
-    path_x, path_y = zip(*path)  # Extract x and y coordinates from path
-    plt.plot(path_y, path_x, marker="o", color="blue", markersize=5, label="Path")
-
-    # Mark start and goal points
-    plt.scatter(start[1], start[0], marker="s", color="green", s=100, label="Start")  # Start (Green)
-    plt.scatter(goal[1], goal[0], marker="s", color="red", s=100, label="Goal")  # Goal (Red)
-
-    # Labels and legend
-    plt.xticks(range(grid.shape[1]))
-    plt.yticks(range(grid.shape[0]))
-    plt.grid(visible=True, color="black", linewidth=0.5)
-    plt.legend()
-    plt.title("Repeated Forward A* Path Visualization")
+    size = len(grid)
+    maze = np.zeros((size, size))
+    
+    for i in range(size):
+        for j in range(size):
+            if grid[i][j] == '#':
+                maze[i][j] = 1  # Blocked
+            elif grid[i][j] == 'A':
+                maze[i][j] = 2  # Agent
+            elif grid[i][j] == 'T':
+                maze[i][j] = 3  # Target
+            else:
+                maze[i][j] = 0  # Unblocked
+    
+    plt.figure(figsize=(8, 8))
+    cmap = plt.cm.get_cmap('viridis', 4)  # 4 colors: Unblocked, Blocked, Agent, Target
+    plt.imshow(maze, cmap=cmap, origin='upper')
+    plt.colorbar(ticks=[0, 1, 2, 3], label='Cell Type')
+    plt.clim(-0.5, 3.5)
+    
+    if path:
+        path_rows, path_cols = zip(*path)
+        plt.plot(path_cols, path_rows, color='red', linewidth=2, label='Path')
+        plt.legend()
+    
+    plt.title(title)
+    plt.xticks([])
+    plt.yticks([])
     plt.show()
 
 # Example Usage
-if __name__ == "__main__":
-    grid_size = 10
-    grid = np.ones((grid_size, grid_size))  # Initialize all cells as unblocked
+grid_example = [
+    ['_', '_', '_', '_', '#'],
+    ['_', '#', '_', '#', '_'],
+    ['_', '#', 'A', '_', '_'],
+    ['_', '#', '_', '#', '_'],
+    ['#', '_', '_', '_', 'T']
+]
 
-    # Sample obstacles (same as used in the algorithm)
-    obstacles = [(3, 3), (3, 4), (4, 4), (5, 4)]
-    for obs in obstacles:
-        grid[obs] = 2  # Mark blocked cells as 2
+# Example path for testing
+example_path = [(2, 2), (2, 3), (3, 3), (4, 3), (4, 4)]
 
-    start = (0, 0)
-    goal = (9, 9)
-
-    # Run the pathfinding algorithm
-    path, expanded_nodes = repeatedForwardAStarB(grid, start, goal)
-
-    # Visualize the path
-    if path:
-        visualize_grid(grid, path, start, goal)
-    else:
-        print("No Path Found")
+# Visualize the maze with a path
+visualize_maze(grid_example, path=example_path, title="Example Maze with Path")
