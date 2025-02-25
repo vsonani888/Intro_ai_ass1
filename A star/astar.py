@@ -17,65 +17,170 @@ def get_neighbors(position, grid_size):
     return neighbors
 
 # A* Search Algorithm with Debug Info
-def a_star_search(grid, start, goal):
+# def a_star_search(grid, start, goal):
+#     grid_size = len(grid)
+#     open_list = PriorityQueue()
+#     open_list.put((0, start))
+#     came_from = {}
+#     g_score = {start: 0}
+#     f_score = {start: manhattan_distance(start, goal)}
+#     expanded_nodes = []
+    
+#     while not open_list.empty():
+#         _, current = open_list.get()
+#         expanded_nodes.append(current)
+#         #print(f"Expanding node: {current}")
+#         if current == goal:
+#             path = reconstruct_path(came_from, start, goal)
+#             return path, expanded_nodes
+        
+#         for neighbor in get_neighbors(current, grid_size):
+#             cell_value = grid[neighbor[0]][neighbor[1]]
+#             if cell_value == '#':
+#                 #print(f"Skipping blocked cell: {neighbor}")
+#                 continue  # Skip blocked cells
+#             tentative_g_score = g_score[current] + 1
+#             if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+#                 came_from[neighbor] = current
+#                 g_score[neighbor] = tentative_g_score
+#                 f_score[neighbor] = tentative_g_score + manhattan_distance(neighbor, goal)
+#                 open_list.put((f_score[neighbor], neighbor))
+#     return None, expanded_nodes  # No path found
+
+
+def a_star_search(grid, start, goal, tie_break='LARGER_G'):
     grid_size = len(grid)
     open_list = PriorityQueue()
-    open_list.put((0, start))
-    came_from = {}
+
     g_score = {start: 0}
     f_score = {start: manhattan_distance(start, goal)}
-    expanded_nodes = []
+    came_from = {}
     
+    # Tie-breaking logic for A* priority queue
+    if tie_break == 'LARGER_G':
+        open_list.put((f_score[start], -g_score[start], start))
+    else:
+        open_list.put((f_score[start], g_score[start], start))
+
+    expanded_nodes = []
+
     while not open_list.empty():
-        _, current = open_list.get()
+        _, _, current = open_list.get()
         expanded_nodes.append(current)
-        #print(f"Expanding node: {current}")
+
         if current == goal:
             path = reconstruct_path(came_from, start, goal)
-            return path, expanded_nodes
-        
+            return path, len(expanded_nodes)  # Return the count of expanded nodes
+
         for neighbor in get_neighbors(current, grid_size):
-            cell_value = grid[neighbor[0]][neighbor[1]]
-            if cell_value == '#':
-                #print(f"Skipping blocked cell: {neighbor}")
-                continue  # Skip blocked cells
+            r, c = neighbor
+            if grid[r][c] == '#':  
+                continue
+
             tentative_g_score = g_score[current] + 1
             if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                 came_from[neighbor] = current
                 g_score[neighbor] = tentative_g_score
                 f_score[neighbor] = tentative_g_score + manhattan_distance(neighbor, goal)
-                open_list.put((f_score[neighbor], neighbor))
-    return None, expanded_nodes  # No path found
+
+                if tie_break == 'LARGER_G':
+                    open_list.put((f_score[neighbor], -g_score[neighbor], neighbor))
+                else:
+                    open_list.put((f_score[neighbor], g_score[neighbor], neighbor))
+
+    return None, len(expanded_nodes)  # Return the count
+
+
 
 # Repeated Forward A* Algorithm
-def repeated_forward_a_star(true_grid, start, goal):
+# def repeated_forward_a_star(true_grid, start, goal):
+#     grid_size = len(true_grid)
+#     knowledge_grid = [['_' for _ in range(grid_size)] for _ in range(grid_size)]
+#     current_position = start
+#     total_expanded = 0
+#     full_path = []
+
+#     while current_position != goal:
+#         # Plan path using current knowledge
+#         path, _ = a_star_search(knowledge_grid, current_position, goal)
+#         if path is None:
+#             print("No path found with current knowledge.")
+#             return None, total_expanded
+        
+#         # Follow the path until an obstacle is encountered or the goal is reached
+#         for step in path[1:]:
+#             full_path.append(step)
+#             total_expanded += 1
+#             if true_grid[step[0]][step[1]] == '#':  # Obstacle discovered
+#                 knowledge_grid[step[0]][step[1]] = '#'  # Update knowledge
+#                 break  # Replan
+#             else:
+#                 current_position = step
+#                 if current_position == goal:
+#                     print(f"Goal reached at {current_position}")
+#                     return full_path, total_expanded
+    
+#     return full_path, total_expanded
+
+def repeated_forward_a_star(true_grid, start, goal, tie_break='LARGER_G'):
+    """
+    Repeated Forward A* with tie-breaking support.
+
+    :param true_grid: The actual/grid world with obstacles (#) and free spaces (_).
+    :param start: (row, col) start position.
+    :param goal: (row, col) goal position.
+    :param tie_break: 'LARGER_G' or 'SMALLER_G' to influence which node is expanded first when f-values tie.
+    :return: (full_path, total_expanded)
+       - full_path: List of (row, col) cells from start to goal (or partial if blocked).
+       - total_expanded: Count of expansions (or steps, depending on your definition).
+    """
+
     grid_size = len(true_grid)
+    # Initialize the knowledge grid with unknown cells marked '_'
     knowledge_grid = [['_' for _ in range(grid_size)] for _ in range(grid_size)]
+
     current_position = start
     total_expanded = 0
     full_path = []
 
     while current_position != goal:
-        # Plan path using current knowledge
-        path, _ = a_star_search(knowledge_grid, current_position, goal)
+        # 1) Plan path using the agent's current knowledge + tie-break
+        path, expanded_in_search = a_star_search(
+            knowledge_grid,            # The "known" world
+            current_position,          # Current position
+            goal,                      # Goal position
+            tie_break=tie_break        # Pass tie-break strategy to A* 
+        )
+
+        # If no path is found, the agent is stuck
         if path is None:
             print("No path found with current knowledge.")
             return None, total_expanded
-        
-        # Follow the path until an obstacle is encountered or the goal is reached
-        for step in path[1:]:
+
+        # Optionally accumulate the expansions performed during the A* search
+        total_expanded += expanded_in_search
+
+        # 2) Follow the path until an obstacle is encountered or the goal is reached
+        for step in path[1:]:  # path[0] is the current position
             full_path.append(step)
-            total_expanded += 1
-            if true_grid[step[0]][step[1]] == '#':  # Obstacle discovered
-                knowledge_grid[step[0]][step[1]] = '#'  # Update knowledge
-                break  # Replan
+            
+            # If we discover an obstacle in the *true* grid (not known yet)
+            if true_grid[step[0]][step[1]] == '#':
+                # Update knowledge
+                knowledge_grid[step[0]][step[1]] = '#'
+                # Break so we can plan again
+                break
             else:
+                # It's a free cell; move the agent
                 current_position = step
+                # Check if we've reached the goal
                 if current_position == goal:
                     print(f"Goal reached at {current_position}")
                     return full_path, total_expanded
-    
+
+    # If the while loop ends normally (somehow), return the path
     return full_path, total_expanded
+
 
 def repeated_backward_a_star(true_grid, start, goal):
     grid_size = len(true_grid)
@@ -107,6 +212,35 @@ def repeated_backward_a_star(true_grid, start, goal):
 
     full_path.reverse()  # Reverse to ensure proper direction
     return full_path, expanded_nodes 
+
+def adaptive_a_star(true_grid, start, goal):
+    grid_size = len(true_grid)
+    knowledge_grid = [['_' for _ in range(grid_size)] for _ in range(grid_size)]
+    current_position = start
+    total_expanded = 0
+    full_path = []
+
+    while current_position != goal:
+        # Plan path using current knowledge
+        path, _ = a_star_search(knowledge_grid, current_position, goal)
+        if path is None:
+            print("No path found with current knowledge.")
+            return None, total_expanded
+        
+        # Follow the path until an obstacle is encountered or the goal is reached
+        for step in path[1:]:
+            full_path.append(step)
+            total_expanded += 1
+            if true_grid[step[0]][step[1]] == '#':  # Obstacle discovered
+                knowledge_grid[step[0]][step[1]] = '#'  # Update knowledge
+                break  # Replan
+            else:
+                current_position = step
+                if current_position == goal:
+                    print(f"Goal reached at {current_position}")
+                    return full_path, total_expanded
+    
+    return full_path, total_expanded
 
 # Path Reconstruction
 def reconstruct_path(came_from, start, goal):
@@ -178,7 +312,7 @@ def test_astar_on_maze_debug():
     path, expanded_nodes = repeated_forward_a_star(maze, start, goal)
 
     # Visualize the Maze with Path and Expanded Nodes
-    visualize_maze_debug(grid_example, path, expanded_nodes, title="A* Debug Visualization on Example Maze")
+    #visualize_maze_debug(grid_example, path, expanded_nodes, title="A* Debug Visualization on Example Maze")
 
 # Run the Debug Test
 #test_astar_on_maze_debug()
@@ -209,7 +343,7 @@ def test_repeated_forward_astar():
     # Visualize the Maze with Path and Expanded Nodes
     if path:
         print(f"Repeated Forward A* found a path with {total_expanded} nodes expanded.")
-        visualize_maze_debug(grid_example, path, None, title="Repeated Forward A* Debug Visualization")
+        #visualize_maze_debug(grid_example, path, None, title="Repeated Forward A* Debug Visualization")
     else:
         print("Repeated Forward A* could not find a path.")
 #test_repeated_forward_astar()
@@ -240,8 +374,9 @@ def test_repeated_backward_astar():
     # Visualize the Maze with Path and Expanded Nodes
     if path:
         print(f"Repeated Backward A* found a path with {total_expanded} nodes expanded.")
-        visualize_maze_debug(grid_example, path, None, title="Repeated Backward A* Debug Visualization")
+        #visualize_maze_debug(grid_example, path, None, title="Repeated Backward A* Debug Visualization")
     else:
         print("Repeated Backward A* could not find a path.")
 
 #test_repeated_backward_astar()
+#test_repeated_forward_astar()
