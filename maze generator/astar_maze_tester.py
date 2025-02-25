@@ -8,7 +8,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'A star')))
 
 # Import functions from astar.py
-from astar import repeated_forward_a_star, repeated_backward_a_star, a_star_search, manhattan_distance, get_neighbors, reconstruct_path
+from astar import repeated_forward_a_star, repeated_backward_a_star, a_star_search, manhattan_distance, get_neighbors, reconstruct_path, adaptive_a_star
 
 # Load mazes from file
 def load_mazes(filename):
@@ -91,4 +91,40 @@ def test_repeated_backward_mazes(filename):
         print(f"Average Nodes Expanded: {total_expanded / solvable_mazes:.2f}")
 
 # Run Repeated Backward A* Tests on Generated Mazes
-test_repeated_backward_mazes('generated_mazes_101.txt')
+# test_repeated_backward_mazes('generated_mazes_101.txt')
+# Test Adaptive A* on 50 mazes
+def test_adaptive_a_star_on_mazes(filename):
+    mazes = load_mazes(filename)
+    solvable_mazes = 0
+    total_expanded = 0
+
+    for idx, maze in enumerate(mazes):
+        start, goal = None, None
+        for i in range(len(maze)):
+            for j in range(len(maze[0])):
+                if maze[i][j] == 'A':
+                    start = (i, j)
+                elif maze[i][j] == 'T':
+                    goal = (i, j)
+
+        if start and goal:
+            path, expanded_nodes, heuristic = adaptive_a_star(maze, start, goal)
+            if path:
+                solvable_mazes += 1
+                total_expanded += len(expanded_nodes)
+
+                #print(f"Maze {idx}: Solved in {expanded_nodes} expanded nodes.")
+                # Visualize a few sample mazes (e.g., first 5)
+                # if idx < 5:
+                #     visualize_maze(maze, path, title=f"Adaptive A* - Maze {idx}")
+            else:
+                print(f"Maze {idx}: No solution found.")
+        else:
+            print(f"Maze {idx}: Invalid start or goal positions.")
+
+    print(f"\nTotal Solvable Mazes: {solvable_mazes}/{len(mazes)}")
+    if solvable_mazes > 0:
+        print(f"Average Nodes Expanded: {total_expanded / solvable_mazes:.2f}")
+
+# Run Adaptive A* Tests on Generated Mazes
+test_adaptive_a_star_on_mazes('generated_mazes_101.txt')

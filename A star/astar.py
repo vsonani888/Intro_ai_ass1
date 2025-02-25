@@ -107,7 +107,44 @@ def repeated_backward_a_star(true_grid, start, goal):
 
     full_path.reverse()  # Reverse to ensure proper direction
     return full_path, expanded_nodes 
+# Adaptive A* Search Algorithm
+def adaptive_a_star(grid, start, goal):
+    grid_size = len(grid)
+    open_list = PriorityQueue()
+    open_list.put((0, start))
+    came_from = {}
+    g_score = {start: 0}
+    h_score = {start: manhattan_distance(start, goal)}
+    f_score = {start: g_score[start] + h_score[start]}
+    expanded_nodes = []
+    adaptive_heuristic = {}  # Store the heuristic updates after each search
 
+    while not open_list.empty():
+        _, current = open_list.get()
+        expanded_nodes.append(current)
+
+        if current == goal:
+            path = reconstruct_path(came_from, start, goal)
+            update_adaptive_heuristic(adaptive_heuristic, g_score, path)
+            return path, expanded_nodes, adaptive_heuristic
+
+        for neighbor in get_neighbors(current, grid_size):
+            if grid[neighbor[0]][neighbor[1]] == '#':
+                continue  # Skip blocked cells
+            tentative_g_score = g_score[current] + 1
+            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                h_value = adaptive_heuristic.get(neighbor, manhattan_distance(neighbor, goal))
+                f_score[neighbor] = tentative_g_score + h_value
+                open_list.put((f_score[neighbor], neighbor))
+
+    return None, expanded_nodes, adaptive_heuristic  # No path found
+# Update Adaptive Heuristic Function
+def update_adaptive_heuristic(adaptive_heuristic, g_score, path):
+    goal_g_value = g_score[path[-1]]
+    for state in path:
+        adaptive_heuristic[state] = goal_g_value - g_score[state]
 # Path Reconstruction
 def reconstruct_path(came_from, start, goal):
     path = [goal]
@@ -245,3 +282,30 @@ def test_repeated_backward_astar():
         print("Repeated Backward A* could not find a path.")
 
 #test_repeated_backward_astar()
+
+# Example Test for Adaptive A*
+def test_adaptive_a_star():
+    grid_example = [
+        ['_', '_', '_', '_', '#'],
+        ['_', '#', '_', '#', '_'],
+        ['_', '#', 'A', '_', '_'],
+        ['_', '#', '_', '#', '_'],
+        ['#', '_', '_', '_', 'T']
+    ]
+
+    # Find agent and target positions
+    start, goal = None, None
+    for i in range(len(grid_example)):
+        for j in range(len(grid_example[0])):
+            if grid_example[i][j] == 'A':
+                start = (i, j)
+            elif grid_example[i][j] == 'T':
+                goal = (i, j)
+
+    # Run Adaptive A* Algorithm
+    path, expanded_nodes, heuristic = adaptive_a_star(grid_example, start, goal)
+    print(f"Path found: {path}")
+    print(f"Total expanded nodes: {len(expanded_nodes)}")
+    print(f"Updated Heuristic: {heuristic}")
+
+test_adaptive_a_star()
