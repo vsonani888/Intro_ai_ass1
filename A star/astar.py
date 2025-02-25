@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from queue import PriorityQueue
+#from queue import PriorityQueue
+from binaryheapbyus import BinaryHeap
+import random
 
 # Manhattan Distance Heuristic
 def manhattan_distance(a, b):
@@ -50,7 +52,7 @@ def get_neighbors(position, grid_size):
 
 def a_star_search(grid, start, goal, tie_break='LARGER_G'):
     grid_size = len(grid)
-    open_list = PriorityQueue()
+    open_list = BinaryHeap()
 
     g_score = {start: 0}
     f_score = {start: manhattan_distance(start, goal)}
@@ -58,14 +60,14 @@ def a_star_search(grid, start, goal, tie_break='LARGER_G'):
     
     # Tie-breaking logic for A* priority queue
     if tie_break == 'LARGER_G':
-        open_list.put((f_score[start], -g_score[start], start))
+        open_list.push((f_score[start], -g_score[start], start))
     else:
-        open_list.put((f_score[start], g_score[start], start))
+        open_list.push((f_score[start], g_score[start], start))
 
     expanded_nodes = []
 
-    while not open_list.empty():
-        _, _, current = open_list.get()
+    while not open_list.is_empty():
+        _, _, current = open_list.pop()
         expanded_nodes.append(current)
 
         if current == goal:
@@ -84,9 +86,9 @@ def a_star_search(grid, start, goal, tie_break='LARGER_G'):
                 f_score[neighbor] = tentative_g_score + manhattan_distance(neighbor, goal)
 
                 if tie_break == 'LARGER_G':
-                    open_list.put((f_score[neighbor], -g_score[neighbor], neighbor))
+                    open_list.push((f_score[neighbor], -g_score[neighbor], neighbor))
                 else:
-                    open_list.put((f_score[neighbor], g_score[neighbor], neighbor))
+                    open_list.push((f_score[neighbor], g_score[neighbor], neighbor))
 
     return None, len(expanded_nodes)  # Return the count
 
@@ -122,96 +124,124 @@ def a_star_search(grid, start, goal, tie_break='LARGER_G'):
     
 #     return full_path, total_expanded
 
-def repeated_forward_a_star(true_grid, start, goal, tie_break='LARGER_G'):
-    """
-    Repeated Forward A* with tie-breaking support.
-
-    :param true_grid: The actual/grid world with obstacles (#) and free spaces (_).
-    :param start: (row, col) start position.
-    :param goal: (row, col) goal position.
-    :param tie_break: 'LARGER_G' or 'SMALLER_G' to influence which node is expanded first when f-values tie.
-    :return: (full_path, total_expanded)
-       - full_path: List of (row, col) cells from start to goal (or partial if blocked).
-       - total_expanded: Count of expansions (or steps, depending on your definition).
-    """
-
-    grid_size = len(true_grid)
-    # Initialize the knowledge grid with unknown cells marked '_'
-    knowledge_grid = [['_' for _ in range(grid_size)] for _ in range(grid_size)]
-
-    current_position = start
-    total_expanded = 0
-    full_path = []
-
-    while current_position != goal:
-        # 1) Plan path using the agent's current knowledge + tie-break
-        path, expanded_in_search = a_star_search(
-            knowledge_grid,            # The "known" world
-            current_position,          # Current position
-            goal,                      # Goal position
-            tie_break=tie_break        # Pass tie-break strategy to A* 
-        )
-
-        # If no path is found, the agent is stuck
-        if path is None:
-            print("No path found with current knowledge.")
-            return None, total_expanded
-
-        # Optionally accumulate the expansions performed during the A* search
-        total_expanded += expanded_in_search
-
-        # 2) Follow the path until an obstacle is encountered or the goal is reached
-        for step in path[1:]:  # path[0] is the current position
-            full_path.append(step)
-            
-            # If we discover an obstacle in the *true* grid (not known yet)
-            if true_grid[step[0]][step[1]] == '#':
-                # Update knowledge
-                knowledge_grid[step[0]][step[1]] = '#'
-                # Break so we can plan again
-                break
-            else:
-                # It's a free cell; move the agent
-                current_position = step
-                # Check if we've reached the goal
-                if current_position == goal:
-                    print(f"Goal reached at {current_position}")
-                    return full_path, total_expanded
-
-    # If the while loop ends normally (somehow), return the path
-    return full_path, total_expanded
-
-
-def repeated_backward_a_star(true_grid, start, goal):
-    grid_size = len(true_grid)
-    knowledge_grid = [['_' for _ in range(grid_size)] for _ in range(grid_size)]
-    current_position = goal  # Start from the goal
-    total_expanded = 0
-    full_path = []
-
-    while current_position != start:
-        # Plan path from the current position to the start (search backward)
-        path, _ = a_star_search(knowledge_grid, current_position, start)
-        if path is None:
-            print("No path found with current knowledge.")
-            return None, total_expanded
+def repeated_forward_a_star(grid, start, goal, tie_break='LARGER_G'):
+    grid_size = len(grid)
+    open_list = BinaryHeap()
+    
+    g_score = {start: 0}
+    f_score = {start: manhattan_distance(start, goal)}
+    came_from = {}
+    
+    if tie_break == 'LARGER_G':
+        open_list.push((f_score[start], -g_score[start], start))
+    else:
+        open_list.push((f_score[start], g_score[start], start))
+    
+    expanded_nodes = []
+    
+    while not open_list.is_empty():
+        _, _, current = open_list.pop()
+        expanded_nodes.append(current)
         
-        # Follow the path until an obstacle is encountered or the start is reached
-        for step in path[1:]:
-            full_path.append(step)
-            total_expanded += 1
-            if true_grid[step[0]][step[1]] == '#':  # Obstacle discovered
-                knowledge_grid[step[0]][step[1]] = '#'  # Update knowledge
-                break  # Replan
-            else:
-                current_position = step
-                if current_position == start:
-                    print(f"Start reached at {current_position}")
-                    full_path.reverse()  # Reverse to get path from start to goal
-                    return full_path, total_expanded
+        if current == goal:
+            path = reconstruct_path(came_from, start, goal)
+            return path, len(expanded_nodes)
+        
+        for neighbor in get_neighbors(current, grid_size):
+            r, c = neighbor
+            if grid[r][c] == '#':  
+                continue  # Skip obstacles
+            
+            tentative_g_score = g_score[current] + 1
+            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = tentative_g_score + manhattan_distance(neighbor, goal)
+                
+                if tie_break == 'LARGER_G':
+                    open_list.push((f_score[neighbor], -g_score[neighbor], neighbor))
+                else:
+                    open_list.push((f_score[neighbor], g_score[neighbor], neighbor))
+    
+    return None, len(expanded_nodes)
 
-    full_path.reverse()  # Reverse to ensure proper direction
-    return full_path, expanded_nodes 
+
+
+def repeated_backward_a_star(grid, start, goal, tie_break='LARGER_G'):
+    """
+    Perform a single backward A* search in a grid from 'goal' to 'start'.
+    - grid: 2D list representing the grid; '#' represents blocked cells.
+    - start: The agent's position (row, col).
+    - goal:  The target position (row, col).
+    - tie_break: 'LARGER_G' or 'SMALLER_G' indicates how to break ties.
+    
+    Returns:
+      path, expanded_count
+    where 'path' is a list of (row, col) from 'start' to 'goal' (in forward direction),
+    and expanded_count is the number of unique cells expanded.
+    """
+    
+    grid_size = len(grid)
+    
+    # For the BACKWARD search, we treat 'goal' as the "start node" of the search
+    # and 'start' as our "goal node" in the search sense.
+    # We'll compute f(n) = g(n) + h(n), where h(n) = manhattan_distance(n, start),
+    # because the search is going from 'goal' -> 'start'.
+    
+    open_list = BinaryHeap()
+    came_from = {}
+    expanded_nodes = []
+    
+    # g_score[node] = best distance found so far from 'goal' (our search-root) to node
+    g_score = {goal: 0}
+    # f_score[node] = g_score[node] + h(node), where h(node) = distance to 'start'
+    f_score = {goal: manhattan_distance(goal, start)}
+    
+    # Push the 'goal' node onto open_list
+    if tie_break == 'LARGER_G':
+        open_list.push((f_score[goal], -g_score[goal], goal))
+    else:
+        open_list.push((f_score[goal], g_score[goal], goal))
+    
+    # Standard A* loop, but we check "if current == start" as our termination
+    while not open_list.is_empty():
+        _, _, current = open_list.pop()
+        
+        # Keep track of expanded nodes
+        if current not in expanded_nodes:
+            expanded_nodes.append(current)
+        
+        # If we've reached the "start" in the backward sense, we are done.
+        if current == start:
+            # Reconstruct the path from 'goal' -> 'start', but then reverse it
+            backward_path = reconstruct_path(came_from, goal, start)
+            forward_path  = list(reversed(backward_path))
+            return forward_path, len(expanded_nodes)
+        
+        # Expand neighbors
+        for neighbor in get_neighbors(current, grid_size):
+            r, c = neighbor
+            if grid[r][c] == '#':
+                continue  # Skip blocked
+            
+            # cost is 1 if neighbor is passable
+            tentative_g_score = g_score[current] + 1
+            
+            if (neighbor not in g_score) or (tentative_g_score < g_score[neighbor]):
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                # Our heuristic is distance to 'start' (since we're doing backward search)
+                f_score[neighbor] = tentative_g_score + manhattan_distance(neighbor, start)
+                
+                if tie_break == 'LARGER_G':
+                    open_list.push((f_score[neighbor], -g_score[neighbor], neighbor))
+                else:
+                    open_list.push((f_score[neighbor], g_score[neighbor], neighbor))
+    
+    # If we exhaust the open_list without reaching 'start', no path was found
+    return None, len(expanded_nodes)
+
+
 
 def adaptive_a_star(true_grid, start, goal):
     grid_size = len(true_grid)

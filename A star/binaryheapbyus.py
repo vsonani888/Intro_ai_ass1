@@ -1,49 +1,54 @@
-import random
+class BinaryHeap:
+    def __init__(self):
+        self.heap = []
 
-def insert(heap, value_map, value, item):
-    if value in heap:
-        value_map[value].append(item)
-    else:
-        value_map[value] = [item]
+    def is_empty(self): # empty heap
+        return len(self.heap) == 0
+
+    def push(self, item): #add item to heap and then heap up
+        self.heap.append(item)
+
+        self.heap_up(len(self.heap) - 1)
+
+    def pop(self): #swap out the last item and item to be removed and then remove the last item then heap down
+        if self.is_empty(): #if heap is empty then return nothing
+            return None
         
-        heap.append(None)
-        index = len(heap) - 1
-        
+        self.swap(0, len(self.heap) - 1) 
 
-        while index > 0 and value < heap[(index - 1) //2]:
-            heap[index] = heap[(index-1)//2]
-            index = (index-1)//2
+        item = self.heap.pop()
 
-        heap[index] = value
+        if not self.is_empty():
+            self.heap_down(0)
 
-def minify(heap, index):
-    size = len(heap)
-    left_child = 2 * index + 1
-    right_child = 2 * index + 2
-    smallest = index
-    
-    if left_child < size and heap[left_child] < heap[smallest]:
-        smallest = left_child
-    
-    if right_child < size and heap[right_child ] < heap[smallest]:
-        smallest = right_child
+        return item
 
-    if smallest != index : 
-        heap[smallest], heap[index] = heap[index], heap[smallest]
-        minify(heap, smallest)
+    def heap_up(self, index): #if current is smaller than parent then swap
+        parent = (index - 1) // 2
 
-def pop(heap, value_map):
-    smallest_value = heap[0]
+        if index > 0 and self.heap[index] < self.heap[parent]:
+            self.swap(index, parent)
 
-    selected_item = value_map[smallest_value].pop(random.randrange(len(value_map[smallest_value])))
+            self.heap_up(parent)
 
-    if len(value_map[smallest_value]) == 0:
-        del value_map[smallest_value]
+    def heap_down(self, index): #find the smallest child if not current node swap
+        left = 2 * index + 1
+        right = 2 * index + 2
+        smallest = index
 
-        heap[0] = heap[-1]
-        heap.pop()
+        if left < len(self.heap) and self.heap[left] < self.heap[smallest]:
+            smallest = left
 
-        if heap:
-            minify(heap, 0)
+        if right < len(self.heap) and self.heap[right] < self.heap[smallest]:
+            smallest = right
 
-    return selected_item 
+        if smallest != index:
+            self.swap(index, smallest)
+
+            self.heap_down(smallest)
+
+    def swap(self, A, B):
+        temp = self.heap[A]
+        self.heap[A] = self.heap[B]
+        self.heap[B] = temp
+
