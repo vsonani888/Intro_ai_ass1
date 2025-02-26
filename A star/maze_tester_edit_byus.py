@@ -208,9 +208,9 @@ if __name__ == "__main__":
     time_a = result_a[2]
     total_mazes_a = result_a[3]
 
-    print("Part 3 results:")
-    print(f"Forward A* larger G block expansion: {expanded_f} | total time: {time_f:.4f}s | solved : {solvable_f}/{total_mazes_f}")
-    print(f"Backward A* larger G block expansion: {expanded_a} | total time: {time_a:.4f}s | solved : {solvable_a}/{total_mazes_a}")
+    print("Part 4 results:")
+    print(f"adaptive A* larger G block expansion: {expanded_f} | total time: {time_f:.4f}s | solved : {solvable_f}/{total_mazes_f}")
+    print(f"adaptive A* larger G block expansion: {expanded_a} | total time: {time_a:.4f}s | solved : {solvable_a}/{total_mazes_a}")
     
 
     
