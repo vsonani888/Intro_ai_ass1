@@ -19,6 +19,16 @@ def get_neighbors(position, grid_size):
             neighbors.append((nr, nc))
     return neighbors
 
+# Path Reconstruction
+def reconstruct_path(came_from, start, goal):
+    path = [goal]
+    current = goal
+    while current != start:
+        current = came_from[current]
+        path.append(current)
+    path.reverse()
+    return path
+
 # A* Search Algorithm with Debug Info
 # def a_star_search(grid, start, goal):
 #     grid_size = len(grid)
@@ -314,15 +324,6 @@ def update_adaptive_heuristic(h_score, g_score, expanded_states, goal):
     # The above "max(...)" ensures that if you already had a bigger heuristic 
     # from previous searches, you keep it.  (Optional but often good for consistency.)
 
-# Path Reconstruction
-def reconstruct_path(came_from, start, goal):
-    path = [goal]
-    current = goal
-    while current != start:
-        current = came_from[current]
-        path.append(current)
-    path.reverse()
-    return path
 
 def visualize_maze_debug(grid, path=None, expanded=None, title="Maze Visualization with Debug"):
     size = len(grid)

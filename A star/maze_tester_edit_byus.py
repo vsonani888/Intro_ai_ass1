@@ -5,7 +5,7 @@ import sys
 import os
 import time
 
-from astar import repeated_backward_a_star, repeated_forward_a_star, adaptive_a_star
+from astarbyus import repeated_backward_a_star, repeated_forward_a_star#, adaptive_a_star
 
 def load_maze(maze_filename):
     with open(maze_filename, 'r') as file:
@@ -62,7 +62,7 @@ def forward_maze_runner(maze_filename, tie_break):
 
         if path: #path exists
             num_solvable += 1
-            total_expanded += expanded_nodes
+            total_expanded += len(expanded_nodes)
 
     end_time = time.time()
     total_time = end_time - start_time
@@ -99,7 +99,7 @@ def backward_maze_runner(maze_filename, tie_break):
 
         if path: #path exists
             num_solvable += 1
-            total_expanded += expanded_nodes
+            total_expanded += len(expanded_nodes)
 
     end_time = time.time()
     total_time = end_time - start_time
@@ -129,14 +129,14 @@ def adaptive_maze_runner(maze_filename, tie_break):
                 elif maze[i][j] == 'T': #its target cell
                     goal = (i, j)
 
-        A_star_output = adaptive_a_star(maze, start, goal) 
+        #A_star_output = adaptive_a_star(maze, start, goal) 
 
-        path = A_star_output[0]
-        expanded_nodes = A_star_output[1]
+        #path = A_star_output[0]
+        #expanded_nodes = A_star_output[1]
 
-        if path: #path exists
-            num_solvable += 1
-            total_expanded += expanded_nodes
+        #if path: #path exists
+        #    num_solvable += 1
+        #    total_expanded += len(expanded_nodes)
 
     end_time = time.time()
     total_time = end_time - start_time
@@ -195,8 +195,8 @@ if __name__ == "__main__":
     total_mazes_b = result_b[3]
 
     print("Part 3 results:")
-    print(f"Forward A* larger G block expansion: {expanded_f} | total time: {time_f:.4f}s | solved : {solvable_f}/{total_mazes_f}")
-    print(f"Backward A* larger G block expansion: {expanded_b} | total time: {time_b:.4f}s | solved : {solvable_b}/{total_mazes_b}")
+    print(f"Forward A* larger G block expansion: {len(expanded_f)} | total time: {time_f:.4f}s | solved : {solvable_f}/{total_mazes_f}")
+    print(f"Backward A* larger G block expansion: {len(expanded_b)} | total time: {time_b:.4f}s | solved : {solvable_b}/{total_mazes_b}")
 
     #part 5 forward a star larger G vs adaptive a star
 
@@ -209,8 +209,8 @@ if __name__ == "__main__":
     total_mazes_a = result_a[3]
 
     print("Part 3 results:")
-    print(f"Forward A* larger G block expansion: {expanded_f} | total time: {time_f:.4f}s | solved : {solvable_f}/{total_mazes_f}")
-    print(f"Backward A* larger G block expansion: {expanded_a} | total time: {time_a:.4f}s | solved : {solvable_a}/{total_mazes_a}")
+    print(f"Forward A* larger G block expansion: {len(expanded_f)} | total time: {time_f:.4f}s | solved : {solvable_f}/{total_mazes_f}")
+    print(f"Backward A* larger G block expansion: {len(expanded_a)} | total time: {time_a:.4f}s | solved : {solvable_a}/{total_mazes_a}")
     
 
     
