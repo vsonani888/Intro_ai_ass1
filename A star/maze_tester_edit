@@ -34,6 +34,10 @@ def load_mazes(filename):
         lines = maze_text.strip().split('\n')[1:]
         maze = [list(line) for line in lines if line]
         mazes.append(maze)
+
+    # for maze in mazes:
+    #     print(maze)
+    #     print()
     return mazes
 
 
@@ -191,7 +195,7 @@ def test_adaptive_mazes(filename):
             # Invalid maze
             continue
 
-        path, expanded_nodes = adaptive_a_star(maze, start, goal)
+        path, expanded_nodes, adaptive_heuristic = adaptive_a_star(maze, start, goal)
         if path:
             num_solvable += 1
             total_expanded += expanded_nodes

@@ -5,10 +5,12 @@ class BinaryHeap:
     def is_empty(self): # empty heap
         return len(self.heap) == 0
 
-    def push(self, item): #add item to heap and then heap up
+    def push(self, item):
+        """Push item into the heap while ensuring tuple-based comparison."""
+        assert isinstance(item, tuple), "Heap only supports tuple-based priorities."
         self.heap.append(item)
-
         self.heap_up(len(self.heap) - 1)
+
 
     def pop(self): #swap out the last item and item to be removed and then remove the last item then heap down
         if self.is_empty(): #if heap is empty then return nothing
