@@ -195,8 +195,8 @@ if __name__ == "__main__":
     total_mazes_b = result_b[3]
 
     print("Part 3 results:")
-    print(f"Forward A* larger G block expansion: {len(expanded_f)} | total time: {time_f:.4f}s | solved : {solvable_f}/{total_mazes_f}")
-    print(f"Backward A* larger G block expansion: {len(expanded_b)} | total time: {time_b:.4f}s | solved : {solvable_b}/{total_mazes_b}")
+    print(f"Forward A* larger G block expansion: {expanded_f} | total time: {time_f:.4f}s | solved : {solvable_f}/{total_mazes_f}")
+    print(f"Backward A* larger G block expansion: {expanded_b} | total time: {time_b:.4f}s | solved : {solvable_b}/{total_mazes_b}")
 
     #part 5 forward a star larger G vs adaptive a star
 
@@ -209,8 +209,8 @@ if __name__ == "__main__":
     total_mazes_a = result_a[3]
 
     print("Part 3 results:")
-    print(f"Forward A* larger G block expansion: {len(expanded_f)} | total time: {time_f:.4f}s | solved : {solvable_f}/{total_mazes_f}")
-    print(f"Backward A* larger G block expansion: {len(expanded_a)} | total time: {time_a:.4f}s | solved : {solvable_a}/{total_mazes_a}")
+    print(f"Forward A* larger G block expansion: {expanded_f} | total time: {time_f:.4f}s | solved : {solvable_f}/{total_mazes_f}")
+    print(f"Backward A* larger G block expansion: {expanded_a} | total time: {time_a:.4f}s | solved : {solvable_a}/{total_mazes_a}")
     
 
     
