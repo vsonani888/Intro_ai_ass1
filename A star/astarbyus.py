@@ -66,7 +66,6 @@ def visualize_maze_debug(grid, path, expanded):
     plt.yticks([])
     plt.show()
                 
-
 def repeated_forward_a_star(grid, start, goal, tie_break):
     grid_size = len(grid)
     open_list = BinaryHeap()
@@ -112,7 +111,6 @@ def repeated_forward_a_star(grid, start, goal, tie_break):
 
     return None, expanded_nodes #no path found
 
-
 def repeated_backward_a_star(grid, start, goal, tie_break):
     grid_size = len(grid)
     open_list = BinaryHeap()
@@ -133,7 +131,7 @@ def repeated_backward_a_star(grid, start, goal, tie_break):
         current = pop_values[3]
         expanded_nodes.append(current)
 
-        if current == goal: #goal found
+        if current == start: #start found
             path = reconstruct_path(came_from, goal, start)
             return path, expanded_nodes
     
@@ -185,9 +183,9 @@ def compute_adaptive_path(grid, start, goal, h_values, tie_break):
 
         expanded.append(current)
 
-        if current == start: #goal found
+        if current == goal: #goal found
             path = reconstruct_path(came_from, start, goal)
-            return path, came_from, expanded
+            return path, g_score, came_from, expanded
         
         current_g = g_score[current]
 
@@ -212,9 +210,7 @@ def compute_adaptive_path(grid, start, goal, h_values, tie_break):
                 else:
                     open_list.push((f_neighbor, g_score[neighbor], random.random(), neighbor))
 
-    return None, g_score, came_from, expanded
-
-    
+    return None, g_score, came_from, expanded    
 
 def adaptive_a_star(grid, start, goal, tie_break):
     grid_size = len(grid)
@@ -403,7 +399,7 @@ def test_repeated_forward_astar():
     print(f"Goal position: {goal}")
 
     if path:
-        print(f"Repeated Forward A* found a path with {len(path)} nodes expanded.")
+        print(f"Repeated Forward A* found a path with {len(total_expanded)} nodes expanded.")
         visualize_maze_debug(examplegrid, path, total_expanded)
     else:
         print("Repeated Forward A* could not find a path.")
@@ -516,7 +512,6 @@ def test_repeated_backward_astar():
     """
 
     splitgrid = rawtgrid.strip().split("\n")
-    
     examplegrid = []
 
     for row in splitgrid:
@@ -543,7 +538,7 @@ def test_repeated_backward_astar():
     print(f"Goal position: {goal}")
 
     if path:
-        print(f"Repeated Backward A* found a path with {len(path)} nodes expanded.")
+        print(f"Repeated Backward A* found a path with {len(total_expanded)} nodes expanded.")
         visualize_maze_debug(examplegrid, path, total_expanded)
     else:
         print("Repeated Backward A* could not find a path.")
@@ -683,10 +678,10 @@ def test_adaptive_astar():
     print(f"Goal position: {goal}")
 
     if path:
-        print(f"Repeated Backward A* found a path with {len(path)} nodes expanded.")
+        print(f"Repeated Backward A* found a path with {len(total_expanded)} nodes expanded.")
         visualize_maze_debug(examplegrid, path, total_expanded)
     else:
         print("Repeated Backward A* could not find a path.")
 
-test_adaptive_astar()
+#test_adaptive_astar()
     

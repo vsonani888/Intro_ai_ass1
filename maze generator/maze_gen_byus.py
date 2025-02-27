@@ -117,16 +117,16 @@ if __name__ == "__main__":
     
     print("hi from main")
 
-    size = 5
+    size = 500
     maze_qty = 50
-    file = open("output.txt", "w")
+    file = open("generated_mazes_500.txt", "w")
 
-    print("printing ", maze_qty, " mazes", file = file)
+    #print("printing ", maze_qty, " mazes", file = file)
 
     #generate_maze(size)
 
     for i in range(maze_qty):
-        print("Maze ", i, file = file)
+        print("MAZE ", i, file = file)
         generate_maze(size)
         print("", file = file)
 
