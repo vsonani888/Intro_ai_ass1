@@ -66,7 +66,8 @@ def visualize_maze_debug(grid, path, expanded):
                 maze[i][j] = 0  # Unblocked
 
     plt.figure(figsize=(8, 8))
-    cmap = plt.colormaps.get_cmap('viridis', 4)  # ✅ Correct
+    cmap = plt.cm.get_cmap('viridis', 4)  # ✅ Corrected version
+
     plt.imshow(maze, cmap=cmap, origin='upper')
 
     expanded_rows, expanded_cols = zip(*expanded)
