@@ -117,9 +117,9 @@ if __name__ == "__main__":
     
     print("hi from main")
 
-    size = 500
-    maze_qty = 50
-    file = open("generated_mazes_500.txt", "w")
+    size = 10
+    maze_qty = 20
+    file = open("generated_mazes_10.txt", "w")
 
     #print("printing ", maze_qty, " mazes", file = file)
 

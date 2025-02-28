@@ -147,7 +147,7 @@ def adaptive_maze_runner(maze_filename, tie_break):
 
 if __name__ == "__main__":
 
-    maze_filename = 'generated_mazes_50.txt'
+    maze_filename = 'generated_mazes_101.txt'
 
     #part 2 forward a star smaller G vs larger G
 
