@@ -436,7 +436,7 @@ def test_repeated_forward_astar():
     else:
         print("Repeated Forward A* could not find a path.")
 
-#test_repeated_forward_astar()
+test_repeated_forward_astar()
 
 def test_repeated_backward_astar():
     rawtgrid = """
@@ -575,7 +575,7 @@ def test_repeated_backward_astar():
     else:
         print("Repeated Backward A* could not find a path.")
 
-#test_repeated_backward_astar()
+test_repeated_backward_astar()
 
 def test_adaptive_astar():
     rawtgrid = """
@@ -715,4 +715,4 @@ def test_adaptive_astar():
     else:
         print("Repeated Backward A* could not find a path.")
 
-#test_adaptive_astar()
+test_adaptive_astar()

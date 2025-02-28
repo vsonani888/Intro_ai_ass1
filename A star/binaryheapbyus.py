@@ -53,4 +53,3 @@ class BinaryHeap:
         temp = self.heap[A]
         self.heap[A] = self.heap[B]
         self.heap[B] = temp
-
