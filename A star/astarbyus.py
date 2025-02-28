@@ -9,16 +9,30 @@ def manhattan_distance(a, b): #distance from a to b
     return distance
 
 def reconstruct_path(came_from, start, goal):
-    path = [goal] #put the goal in the path list
+    path = [goal]  # Start reconstructing from goal
     current = goal
-    
-    while current != start:
-        current = came_from[current] #new current is old current's parent
-        path.append(current) #add new current to the path list
-    
-    path.reverse() #reverse the path from agent to target
 
+    print(f"\n=== Reconstructing Path ===")
+    print(f"📌 Start: {start}, Goal: {goal}")
+    print(f"🗺️ came_from keys (first 10): {list(came_from.keys())[:10]}")
+
+    if goal not in came_from:
+        print(f"❌ ERROR: Goal {goal} is NOT in came_from! Returning empty path.")
+        return []
+
+    while current != start:
+        if current not in came_from:
+            print(f"❌ ERROR: No parent for {current}! Returning incomplete path.")
+            return []
+
+        current = came_from[current]
+        print(f"🔙 Backtracking: New Current = {current}")
+        path.append(current)
+
+    path.reverse()  # Reverse path from start to goal
+    print(f"✅ Final Path: {path}")
     return path
+
 
 def get_neighbors(pos, grid_size):
     r = pos[0]
@@ -52,7 +66,8 @@ def visualize_maze_debug(grid, path, expanded):
                 maze[i][j] = 0  # Unblocked
 
     plt.figure(figsize=(8, 8))
-    cmap = plt.cm.get_cmap('viridis', 4)
+    cmap = plt.cm.get_cmap('viridis', 4)  # ✅ Corrected version
+
     plt.imshow(maze, cmap=cmap, origin='upper')
 
     expanded_rows, expanded_cols = zip(*expanded)
@@ -66,6 +81,7 @@ def visualize_maze_debug(grid, path, expanded):
     plt.yticks([])
     plt.show()
                 
+
 def repeated_forward_a_star(grid, start, goal, tie_break):
     grid_size = len(grid)
     open_list = BinaryHeap()
@@ -157,30 +173,18 @@ def repeated_backward_a_star(grid, start, goal, tie_break):
     return None, expanded_nodes #no path found
 
 def compute_adaptive_path(grid, start, goal, h_values, tie_break):
+    print(f"\n=== Computing Adaptive Path ===\nStart: {start}, Goal: {goal}")
+
     grid_size = len(grid)
     open_list = BinaryHeap()
-
-    g_score = {start: 0, goal: float('inf')} 
-    came_from = {} #empty list to store where each block to block came from
-
-    f_start = g_score[start] + h_values[start]
-
-    if tie_break == 'LARGER_G':
-        open_list.push((f_start, -g_score[start], random.random(), start))
-    else:
-        open_list.push((f_start, g_score[start], random.random(), start))
-
+    g_score = {start: 0}
+    f_score = {start: manhattan_distance(start, goal)}
+    came_from = {}
+    open_list.push((f_score[start], start))
     expanded = []
 
-    grid_size = len(grid)
-
-    while not open_list.is_empty():
-        pop_values = open_list.pop()
-        current = pop_values[3]
-
-        if current in expanded:
-            continue
-
+    while not open_list.empty():
+        _, current = open_list.pop()
         expanded.append(current)
 
         if current == goal: #goal found
@@ -190,17 +194,12 @@ def compute_adaptive_path(grid, start, goal, h_values, tie_break):
         current_g = g_score[current]
 
         for neighbor in get_neighbors(current, grid_size):
+            r, c = neighbor
+            if grid[r][c] == '#':  
+                continue  # Skip obstacles
 
-            r = neighbor[0]
-            c = neighbor[1]
-
-            if grid[r][c] == '#': #path is blocked
-                continue
-
-            new_g_score = current_g + 1
-
-            if neighbor not in g_score or new_g_score < g_score[neighbor]:
-                g_score[neighbor] = new_g_score
+            tentative_g_score = g_score[current] + 1
+            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                 came_from[neighbor] = current
 
                 f_neighbor = g_score[neighbor] + h_values[neighbor]
@@ -224,28 +223,44 @@ def adaptive_a_star(grid, start, goal, tie_break):
     total_expanded = []
     full_path = [current]
 
+    print(f"\n=== Adaptive A* Starting ===\nStart: {start}, Goal: {goal}, Grid Size: {grid_size}")
+
     while True:
+        print(f"\n🔹 Calling compute_adaptive_path from {current} to {goal}...")
         adaptive_out = compute_adaptive_path(grid, current, goal, h_values, tie_break)
+        
+        if adaptive_out is None:
+            print("❌ compute_adaptive_path returned None. No valid path.")
+            return None, total_expanded
+
         path = adaptive_out[0]
         g_score = adaptive_out[1]
         came_from = adaptive_out[2]
         expanded = adaptive_out[3]
 
+        print(f"📌 Step Completed - Path: {path}")
+        print(f"🟠 Expanded Nodes: {len(expanded)}")
+        print(f"🗺️ came_from keys (first 10): {list(came_from.keys())[:10]}")
+        print(f"🎯 Goal in came_from? {'Yes' if goal in came_from else 'No'}")
+        
         total_expanded.extend(expanded)
 
         if path is None:
+            print(f"❌ No path found from {current}. Returning.")
             return None, total_expanded
         
         if goal in g_score:
             g_goal = g_score[goal]
+            print(f"✅ Goal Found! g_score[{goal}] = {g_goal}")
 
             for s in g_score:
                 if s != goal and (s in came_from or s == current):
                     old_h = h_values[s]
                     new_h = g_goal - g_score[s]
 
-                    if new_h > old_h :
+                    if new_h > old_h:
                         h_values[s] = new_h
+                        print(f"🔧 Updated heuristic at {s}: old_h={old_h}, new_h={new_h}")
 
         blocked = False
 
@@ -253,6 +268,7 @@ def adaptive_a_star(grid, start, goal, tie_break):
             next_cell = path[i]
 
             if grid[next_cell[0]][next_cell[1]] == '#':
+                print(f"🚧 Blocked at {next_cell}, backtracking...")
                 blocked = True
                 current = path[i-1]
                 break
@@ -260,11 +276,18 @@ def adaptive_a_star(grid, start, goal, tie_break):
                 current = next_cell
                 full_path.append(current)
 
+            print(f"➡️ Moving to {current}, Goal={goal}")
+
             if current == goal:
+                print(f"🎉 Goal reached at {goal}!")
                 return full_path, total_expanded
         
         if not blocked and current == goal:
+            print(f"🎉 Reached Goal without Obstruction!")
             return full_path, total_expanded
+
+        print(f"🔄 Looping again. Current: {current}, Goal: {goal}")
+
 
 def test_repeated_forward_astar():
     rawtgrid = """

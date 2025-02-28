@@ -79,26 +79,57 @@ def test_stepwise_path(maze_index, filename):
     f_score = {start: manhattan_distance(start, goal)}
     came_from = {}
     open_list.put((f_score[start], start))
-    while open_list:
-        current = open_list.pop(0)[1]  # Extract the node with the lowest priority
+    while not open_list.empty():
+        f_score_value, current = open_list.get()  # Unpack priority and node
         expanded_nodes.append(current)
+
         # Save visualization for each step
-        visualize_step(maze, path, expanded_nodes, step, filename=f"maze_{maze_index}_step_{step}.png")
+        visualize_path(maze, path, expanded_nodes, step, filename=f"maze_{maze_index}_step_{step}.png")
         step += 1
-        if current == goal:#found target position
-            path = reconstruct_path(came_from, start, goal)#store path
+
+        if current == goal:
+            path = reconstruct_path(came_from, start, goal)
             print(f"Goal reached at {goal} in {step} steps.")
             break
-        for neighbor in get_neighbors(current, grid_size):
+
+        for neighbor in get_neighbors(current, grid_size):  # Now correctly passing just (r, c)
             r, c = neighbor
-            if maze[r][c] == '#':  
+            if maze[r][c] == '#':
                 continue  # Skip obstacles
+
             tentative_g_score = g_score[current] + 1
             if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
-                came_from[neighbor] = current#updating the g score if shorter path
+                came_from[neighbor] = current
                 g_score[neighbor] = tentative_g_score
-                f_score[neighbor] = tentative_g_score + manhattan_distance(neighbor, goal)#update f score estimated total cost
-                open_list.put((f_score[neighbor], neighbor))
+                tentative_f_score = tentative_g_score + manhattan_distance(neighbor, goal)
+
+                if not isinstance(f_score, dict):  # Debugging step
+                    raise TypeError(f"f_score should be a dictionary, but got {type(f_score)} instead.")
+
+                f_score[neighbor] = tentative_f_score  # Ensure dictionary assignment
+                open_list.put((tentative_f_score, neighbor))  # Ensure this tuple structure
+
+    # while open_list:
+    #     current = open_list.get()  # Extract the node with the lowest priority
+    #     _, node = current  # Unpack priority and node
+    #     expanded_nodes.append(node)
+    #     # Save visualization for each step
+    #     visualize_path(maze, path, expanded_nodes, step, filename=f"maze_{maze_index}_step_{step}.png")
+    #     step += 1
+    #     if current == goal:#found target position
+    #         path = reconstruct_path(came_from, start, goal)#store path
+    #         print(f"Goal reached at {goal} in {step} steps.")
+    #         break
+    #     for neighbor in get_neighbors(current, grid_size):
+    #         r, c = neighbor
+    #         if maze[r][c] == '#':  
+    #             continue  # Skip obstacles
+    #         tentative_g_score = g_score[current] + 1
+    #         if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+    #             came_from[neighbor] = current#updating the g score if shorter path
+    #             g_score[neighbor] = tentative_g_score
+    #             f_score[neighbor] = tentative_g_score + manhattan_distance(neighbor, goal)#update f score estimated total cost
+    #             open_list.put((f_score[neighbor], neighbor))
     print(f"Stepwise images saved in '{stepwise_output_dir}/'.")
     return path
 test_stepwise_path(maze_index=0, filename='generated_mazes_101.txt')

@@ -10,7 +10,8 @@ class BinaryHeap:
         assert isinstance(item, tuple), "Heap only supports tuple-based priorities."
         self.heap.append(item)
         self.heap_up(len(self.heap) - 1)
-
+    def empty(self):  # ✅ Alias method for compatibility
+        return self.is_empty()
 
     def pop(self): #swap out the last item and item to be removed and then remove the last item then heap down
         if self.is_empty(): #if heap is empty then return nothing
