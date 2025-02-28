@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import time
 from queue import PriorityQueue
-from astarbyus import repeated_backward_a_star, get_neighbors, reconstruct_path, manhattan_distance
+from astarbyus import repeated_forward_a_star, get_neighbors, reconstruct_path, manhattan_distance
 
 def load_mazes(filename):#just loading the mazes reading file
     with open(filename, 'r') as file:
